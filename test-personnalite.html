@@ -1,0 +1,1875 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cartographie de l'Âme — Test de Personnalité</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Cinzel:wght@400;600&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0e1016;
+    --bg2: #141720;
+    --bg3: #1c2030;
+    --or: #d4a843;
+    --or-clair: #e8c97a;
+    --or-pale: rgba(212,168,67,0.15);
+    --text: #e8e2d6;
+    --text-soft: #b0a898;
+    --text-muted: #7a7060;
+    --border: rgba(212,168,67,0.2);
+    --accent: #c04030;
+    --bleu: #4a8ab5;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Cormorant Garamond', serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ---- BACKGROUND ---- */
+  .bg-texture {
+    position: fixed; inset: 0; z-index: 0;
+    background:
+      radial-gradient(ellipse at 15% 15%, rgba(212,168,67,0.07) 0%, transparent 50%),
+      radial-gradient(ellipse at 85% 85%, rgba(74,138,181,0.05) 0%, transparent 50%);
+    pointer-events: none;
+  }
+
+  /* ---- ORNAMENTS ---- */
+  .ornament {
+    text-align: center;
+    color: var(--or);
+    font-size: 1.2rem;
+    letter-spacing: 0.5em;
+    opacity: 0.8;
+  }
+
+  .divider {
+    display: flex; align-items: center; gap: 1rem;
+    margin: 1.5rem 0;
+  }
+  .divider-line { flex: 1; height: 1px; background: linear-gradient(to right, transparent, var(--or), transparent); }
+  .divider-gem {
+    width: 8px; height: 8px;
+    background: var(--or);
+    transform: rotate(45deg);
+    flex-shrink: 0;
+  }
+
+  /* ---- SCREENS ---- */
+  .screen { display: none; position: relative; z-index: 1; }
+  .screen.active { display: block; }
+
+  /* ---- INTRO ---- */
+  #screen-intro {
+    min-height: 100vh;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 2rem;
+    text-align: center;
+  }
+  #screen-intro.active { display: flex; }
+
+  .intro-seal {
+    width: 120px; height: 120px;
+    border: 2px solid var(--or);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 2rem;
+    position: relative;
+    animation: rotateSeal 30s linear infinite;
+  }
+  .intro-seal::before {
+    content: '';
+    position: absolute; inset: 6px;
+    border: 1px solid rgba(201,168,76,0.4);
+    border-radius: 50%;
+  }
+  @keyframes rotateSeal { to { transform: rotate(360deg); } }
+  .seal-inner { font-size: 3rem; animation: rotateSeal 30s linear infinite reverse; }
+
+  .intro-title {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(1.8rem, 4vw, 3rem);
+    font-weight: 400;
+    color: var(--text);
+    letter-spacing: 0.1em;
+    line-height: 1.2;
+    margin-bottom: 0.5rem;
+  }
+
+  .intro-subtitle {
+    font-family: 'IM Fell English', serif;
+    font-style: italic;
+    font-size: 1.15rem;
+    color: var(--or);
+    letter-spacing: 0.05em;
+    margin-bottom: 2rem;
+  }
+
+  .intro-desc {
+    max-width: 580px;
+    font-size: 1.1rem;
+    line-height: 1.9;
+    color: var(--text-soft);
+    margin-bottom: 2rem;
+  }
+
+  .intro-desc strong {
+    color: var(--text);
+    font-weight: 600;
+  }
+
+  .intro-badges {
+    display: flex; flex-wrap: wrap; gap: 0.6rem;
+    justify-content: center;
+    margin-bottom: 2.5rem;
+  }
+  .badge {
+    padding: 0.3rem 0.8rem;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    font-size: 0.75rem;
+    font-family: 'Cinzel', serif;
+    letter-spacing: 0.1em;
+    color: var(--text-soft);
+    background: var(--bg2);
+  }
+
+  .btn-primary {
+    font-family: 'Cinzel', serif;
+    font-size: 0.85rem;
+    letter-spacing: 0.2em;
+    color: var(--bg);
+    background: var(--or);
+    border: 1px solid var(--or-clair);
+    padding: 1rem 2.5rem;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-transform: uppercase;
+    position: relative;
+    overflow: hidden;
+    font-weight: 600;
+  }
+  .btn-primary::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(135deg, transparent 40%, rgba(255,255,255,0.1) 100%);
+  }
+  .btn-primary:hover {
+    background: var(--or-clair);
+    transform: translateY(-1px);
+    box-shadow: 0 8px 30px rgba(212,168,67,0.3);
+  }
+
+  .intro-note {
+    margin-top: 2rem;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    font-style: italic;
+  }
+
+  /* ---- QUESTION SCREEN ---- */
+  #screen-question {
+    min-height: 100vh;
+    display: none;
+    flex-direction: column;
+    padding: 0;
+  }
+  #screen-question.active { display: flex; }
+
+  .progress-bar-wrap {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    height: 3px;
+    background: rgba(201,168,76,0.15);
+  }
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(to right, var(--or), var(--or-clair));
+    transition: width 0.5s ease;
+  }
+
+  .question-header {
+    padding: 3rem 2rem 1rem;
+    text-align: center;
+    border-bottom: 1px solid var(--border);
+    background: rgba(14,16,22,0.95);
+    backdrop-filter: blur(10px);
+    position: sticky; top: 0; z-index: 50;
+  }
+
+  .section-label {
+    font-family: 'Cinzel', serif;
+    font-size: 0.65rem;
+    letter-spacing: 0.3em;
+    color: var(--or);
+    text-transform: uppercase;
+    margin-bottom: 0.4rem;
+  }
+
+  .question-counter {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    font-style: italic;
+  }
+
+  .question-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 2rem;
+    max-width: 700px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  .question-text {
+    font-size: clamp(1.2rem, 2.5vw, 1.6rem);
+    line-height: 1.7;
+    text-align: center;
+    color: var(--text);
+    font-weight: 300;
+    margin-bottom: 2.5rem;
+    font-style: italic;
+  }
+
+  .question-icon {
+    font-size: 2.5rem;
+    margin-bottom: 1.5rem;
+    opacity: 0.85;
+  }
+
+  /* ---- LIKERT SCALE ---- */
+  .scale-wrap { width: 100%; max-width: 500px; }
+
+  .scale-labels {
+    display: flex; justify-content: space-between;
+    margin-bottom: 0.8rem;
+    font-size: 0.78rem;
+    color: var(--text-soft);
+    font-style: italic;
+  }
+
+  .scale-options {
+    display: flex; gap: 0.5rem; justify-content: center;
+    margin-bottom: 0.8rem;
+  }
+
+  .scale-btn {
+    width: 50px; height: 50px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(212,168,67,0.25);
+    background: var(--bg2);
+    cursor: pointer;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1rem;
+    color: var(--text-soft);
+    transition: all 0.25s;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .scale-btn:hover {
+    border-color: var(--or);
+    background: var(--bg3);
+    color: var(--text);
+    transform: scale(1.08);
+  }
+  .scale-btn.selected {
+    background: var(--or);
+    border-color: var(--or-clair);
+    color: var(--bg);
+    font-weight: 700;
+    transform: scale(1.12);
+    box-shadow: 0 4px 20px rgba(212,168,67,0.4);
+  }
+
+  .scale-desc {
+    text-align: center;
+    font-size: 0.9rem;
+    color: var(--or);
+    font-style: italic;
+    height: 1.5rem;
+    transition: opacity 0.2s;
+  }
+
+  /* ---- NAV BUTTONS ---- */
+  .nav-wrap {
+    display: flex; justify-content: center; gap: 1rem;
+    padding: 2rem;
+    border-top: 1px solid var(--border);
+    background: rgba(14,16,22,0.8);
+  }
+
+  .btn-nav {
+    font-family: 'Cinzel', serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.15em;
+    padding: 0.8rem 1.8rem;
+    border: 1px solid;
+    cursor: pointer;
+    transition: all 0.25s;
+    text-transform: uppercase;
+  }
+  .btn-prev {
+    border-color: var(--border);
+    background: transparent;
+    color: var(--text-muted);
+  }
+  .btn-prev:hover { border-color: var(--or); color: var(--text-soft); }
+  .btn-next {
+    border-color: var(--or);
+    background: var(--or);
+    color: var(--bg);
+    font-weight: 600;
+  }
+  .btn-next:hover { background: var(--or-clair); border-color: var(--or-clair); }
+  .btn-next { display: none; }
+
+  /* ---- LOADING ---- */
+  #screen-loading {
+    min-height: 100vh;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    text-align: center;
+    padding: 2rem;
+  }
+  #screen-loading.active { display: flex; }
+
+  .loading-orb {
+    width: 80px; height: 80px;
+    border: 2px solid rgba(201,168,76,0.3);
+    border-top-color: var(--or);
+    border-radius: 50%;
+    animation: spin 1.5s linear infinite;
+    margin-bottom: 2rem;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .loading-text {
+    font-family: 'IM Fell English', serif;
+    font-style: italic;
+    font-size: 1.2rem;
+    color: var(--text-soft);
+  }
+
+  .loading-steps {
+    margin-top: 2rem;
+    display: flex; flex-direction: column; gap: 0.5rem;
+  }
+  .loading-step {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    font-style: italic;
+    opacity: 0;
+    transition: opacity 0.5s;
+  }
+  .loading-step.show { opacity: 1; color: var(--text-soft); }
+
+  /* ---- RESULTS ---- */
+  #screen-results {
+    display: none;
+    padding: 3rem 1.5rem;
+    max-width: 900px;
+    margin: 0 auto;
+    background: var(--bg);
+  }
+  #screen-results.active { display: block; }
+
+  .results-title {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(1.5rem, 3vw, 2.2rem);
+    color: var(--text);
+    text-align: center;
+    font-weight: 400;
+    margin-bottom: 0.5rem;
+    letter-spacing: 0.1em;
+  }
+
+  .archetype-badge {
+    text-align: center;
+    font-family: 'IM Fell English', serif;
+    font-style: italic;
+    font-size: 1.2rem;
+    color: var(--or);
+    margin-bottom: 0.5rem;
+  }
+
+  .archetype-desc {
+    text-align: center;
+    max-width: 600px;
+    margin: 0 auto 2rem;
+    font-size: 1.08rem;
+    line-height: 1.85;
+    color: var(--text-soft);
+    font-style: italic;
+  }
+
+  /* ---- DIMENSIONS ---- */
+  .dimensions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .dimension-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    padding: 1.5rem;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s;
+  }
+  .dimension-card::before {
+    content: '';
+    position: absolute; top: 0; left: 0;
+    width: 3px; height: 100%;
+    background: var(--or);
+  }
+  .dimension-card:hover {
+    box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+    border-color: rgba(212,168,67,0.4);
+    transform: translateY(-2px);
+  }
+
+  .dim-header {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    margin-bottom: 1rem;
+  }
+
+  .dim-name {
+    font-family: 'Cinzel', serif;
+    font-size: 0.78rem;
+    letter-spacing: 0.15em;
+    color: var(--text);
+    text-transform: uppercase;
+  }
+
+  .dim-score-label {
+    font-size: 1.6rem;
+    font-weight: 300;
+    color: var(--or);
+    line-height: 1;
+  }
+
+  .dim-bar-wrap {
+    height: 3px;
+    background: rgba(212,168,67,0.1);
+    border-radius: 2px;
+    margin-bottom: 0.8rem;
+    overflow: hidden;
+  }
+  .dim-bar-fill {
+    height: 100%;
+    background: linear-gradient(to right, var(--or), var(--or-clair));
+    border-radius: 2px;
+    transition: width 1.5s cubic-bezier(0.25, 1, 0.5, 1);
+    width: 0;
+  }
+
+  .dim-poles {
+    display: flex; justify-content: space-between;
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    margin-bottom: 0.8rem;
+    font-style: italic;
+  }
+
+  .dim-desc {
+    font-size: 0.92rem;
+    line-height: 1.75;
+    color: var(--text-soft);
+  }
+
+  .insights-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1.2rem;
+    margin-bottom: 2rem;
+  }
+
+  .insight-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    padding: 1.2rem 1.5rem;
+  }
+
+  .insight-icon { font-size: 1.5rem; margin-bottom: 0.6rem; }
+
+  .insight-title {
+    font-family: 'Cinzel', serif;
+    font-size: 0.72rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--or);
+    margin-bottom: 0.5rem;
+  }
+
+  .insight-text {
+    font-size: 0.92rem;
+    line-height: 1.75;
+    color: var(--text-soft);
+  }
+
+  /* ---- SECTION TITLE ---- */
+  .section-title-main {
+    font-family: 'Cinzel', serif;
+    font-size: 0.78rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    text-align: center;
+    margin-bottom: 1.5rem;
+  }
+
+  .btn-restart {
+    display: block;
+    margin: 2rem auto 0;
+    font-family: 'Cinzel', serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.15em;
+    padding: 0.8rem 2rem;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: all 0.25s;
+  }
+  .btn-restart:hover { border-color: var(--or); color: var(--text-soft); }
+
+  /* ---- TRANSITIONS ---- */
+  .fade-in {
+    animation: fadeIn 0.6s ease forwards;
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(15px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .question-transition {
+    animation: slideQ 0.35s ease forwards;
+  }
+  @keyframes slideQ {
+    from { opacity: 0; transform: translateX(20px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  @keyframes particle {
+    0%   { transform: translate(0,0) scale(1); opacity: 1; }
+    100% { transform: translate(var(--dx), var(--dy)) scale(0); opacity: 0; }
+  }
+
+  /* ---- ALCHEMICAL SECTION ---- */
+  .alchemic-hero {
+    text-align: center;
+    padding: 3rem 1rem 2rem;
+    position: relative;
+  }
+
+  .alchemic-symbol {
+    font-size: 5rem;
+    display: block;
+    margin-bottom: 1rem;
+    animation: floatSymbol 4s ease-in-out infinite;
+    filter: drop-shadow(0 0 20px rgba(212,168,67,0.4));
+  }
+  @keyframes floatSymbol {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-10px) rotate(3deg); }
+  }
+
+  .alchemic-element-name {
+    font-family: 'Cinzel', serif;
+    font-size: 2rem;
+    letter-spacing: 0.3em;
+    color: var(--or);
+    margin-bottom: 0.3rem;
+  }
+
+  .alchemic-latin {
+    font-family: 'IM Fell English', serif;
+    font-style: italic;
+    font-size: 1rem;
+    color: var(--text-muted);
+    letter-spacing: 0.1em;
+    margin-bottom: 1.5rem;
+  }
+
+  .alchemic-element-desc {
+    max-width: 620px;
+    margin: 0 auto;
+    font-size: 1.05rem;
+    line-height: 1.9;
+    color: var(--text-soft);
+  }
+
+  /* Great Work stages */
+  .stages-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin-bottom: 2rem;
+    position: relative;
+  }
+  .stages-wrap::before {
+    content: '';
+    position: absolute;
+    left: 28px; top: 0; bottom: 0;
+    width: 1px;
+    background: linear-gradient(to bottom, transparent, var(--or), var(--or), transparent);
+    opacity: 0.3;
+  }
+
+  .stage-card {
+    display: flex;
+    gap: 1.5rem;
+    padding: 1.5rem;
+    border-left: none;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    margin-bottom: 1px;
+    transition: all 0.3s;
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  .stage-card.reveal {
+    opacity: 1;
+    transform: translateX(0);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+  }
+  .stage-card:hover { border-color: rgba(212,168,67,0.4); background: var(--bg3); }
+
+  .stage-orb {
+    width: 56px; height: 56px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.6rem;
+    flex-shrink: 0;
+    border: 1px solid rgba(212,168,67,0.3);
+    position: relative;
+    z-index: 2;
+  }
+
+  .stage-body { flex: 1; }
+
+  .stage-name {
+    font-family: 'Cinzel', serif;
+    font-size: 0.85rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 0.2rem;
+  }
+
+  .stage-latin {
+    font-family: 'IM Fell English', serif;
+    font-style: italic;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-bottom: 0.6rem;
+  }
+
+  .stage-desc {
+    font-size: 0.92rem;
+    line-height: 1.75;
+    color: var(--text-soft);
+  }
+
+  .stage-level {
+    display: inline-block;
+    margin-top: 0.6rem;
+    padding: 0.2rem 0.7rem;
+    font-family: 'Cinzel', serif;
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    border: 1px solid;
+    border-radius: 2px;
+  }
+
+  /* Nigredo */
+  .stage-nigredo .stage-orb { background: rgba(30,20,40,0.8); }
+  .stage-nigredo .stage-name { color: #b090d0; }
+  .stage-nigredo .stage-level { color: #b090d0; border-color: rgba(176,144,208,0.4); }
+
+  /* Albedo */
+  .stage-albedo .stage-orb { background: rgba(220,230,240,0.1); }
+  .stage-albedo .stage-name { color: #c0d0e0; }
+  .stage-albedo .stage-level { color: #c0d0e0; border-color: rgba(192,208,224,0.4); }
+
+  /* Citrinitas */
+  .stage-citrinitas .stage-orb { background: rgba(212,168,67,0.1); }
+  .stage-citrinitas .stage-name { color: var(--or); }
+  .stage-citrinitas .stage-level { color: var(--or); border-color: rgba(212,168,67,0.4); }
+
+  /* Rubedo */
+  .stage-rubedo .stage-orb { background: rgba(192,64,48,0.15); }
+  .stage-rubedo .stage-name { color: #e07060; }
+  .stage-rubedo .stage-level { color: #e07060; border-color: rgba(224,112,96,0.4); }
+
+  /* GREAT WORK box */
+  .great-work-box {
+    background: linear-gradient(135deg, rgba(212,168,67,0.06), rgba(192,64,48,0.04));
+    border: 1px solid rgba(212,168,67,0.35);
+    padding: 2rem;
+    text-align: center;
+    margin-bottom: 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .great-work-box::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse at 50% 0%, rgba(212,168,67,0.08), transparent 60%);
+  }
+
+  .great-work-title {
+    font-family: 'Cinzel', serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 1rem;
+  }
+
+  .great-work-statement {
+    font-family: 'IM Fell English', serif;
+    font-style: italic;
+    font-size: 1.3rem;
+    line-height: 1.7;
+    color: var(--text);
+    margin-bottom: 1rem;
+  }
+
+  .great-work-body {
+    font-size: 0.95rem;
+    line-height: 1.8;
+    color: var(--text-soft);
+    max-width: 580px;
+    margin: 0 auto;
+  }
+
+  /* Planetary ruler */
+  .planet-card {
+    display: flex; align-items: center; gap: 1.5rem;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+  .planet-symbol { font-size: 3rem; opacity: 0.9; }
+  .planet-body .planet-name {
+    font-family: 'Cinzel', serif;
+    font-size: 1rem;
+    letter-spacing: 0.15em;
+    color: var(--or);
+    margin-bottom: 0.3rem;
+  }
+  .planet-body .planet-desc {
+    font-size: 0.92rem;
+    line-height: 1.75;
+    color: var(--text-soft);
+  }
+
+  /* Scroll reveal for results sections */
+  .reveal-section {
+    opacity: 0;
+    transform: translateY(25px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+  .reveal-section.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Score ring */
+  .score-ring-wrap {
+    display: flex; justify-content: center; gap: 1.5rem;
+    flex-wrap: wrap;
+    margin-bottom: 2rem;
+  }
+
+  .score-ring {
+    text-align: center;
+    width: 90px;
+  }
+  .score-ring svg { transform: rotate(-90deg); }
+  .score-ring-label {
+    font-family: 'Cinzel', serif;
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-top: 0.4rem;
+  }
+  .score-ring-val {
+    font-size: 0.9rem;
+    color: var(--text-soft);
+    font-style: italic;
+  }
+
+  /* ---- ACTION BAR ---- */
+  .action-bar { padding: 0 0 1rem; }
+
+  .action-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+  }
+
+  .btn-action {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 1.2rem 1.8rem;
+    border: 1px solid var(--border);
+    background: var(--bg2);
+    cursor: pointer;
+    transition: all 0.25s;
+    min-width: 140px;
+    color: var(--text);
+  }
+  .btn-action:hover {
+    border-color: var(--or);
+    background: var(--bg3);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+  }
+
+  .btn-action-icon { font-size: 1.6rem; }
+  .btn-action-label {
+    font-family: 'Cinzel', serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text);
+  }
+  .btn-action-sub {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    font-style: italic;
+  }
+
+  .btn-share:hover { border-color: #4a9a6a; }
+  .btn-image:hover { border-color: #6a7abf; }
+  .btn-restart-new:hover { border-color: var(--or); }
+
+  .share-toast {
+    text-align: center;
+    padding: 0.6rem 1.5rem;
+    background: rgba(74,154,106,0.15);
+    border: 1px solid rgba(74,154,106,0.4);
+    color: #7ac090;
+    font-family: 'Cinzel', serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.15em;
+    margin: 0 auto;
+    max-width: 320px;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: all 0.4s;
+    pointer-events: none;
+  }
+  .share-toast.show {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  @media (max-width: 600px) {
+    .scale-btn { width: 42px; height: 42px; font-size: 0.85rem; }
+    .question-body { padding: 2rem 1.2rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="bg-texture"></div>
+
+<!-- ========== INTRO ========== -->
+<div id="screen-intro" class="screen active fade-in">
+  <div class="intro-seal">
+    <span class="seal-inner">☽</span>
+  </div>
+
+  <div class="ornament">✦ &nbsp; ✦ &nbsp; ✦</div>
+  <br>
+
+  <h1 class="intro-title">Cartographie<br>de l'Âme</h1>
+  <div class="intro-subtitle">Un portrait psychologique fondé sur la science</div>
+
+  <div class="divider">
+    <div class="divider-line"></div>
+    <div class="divider-gem"></div>
+    <div class="divider-line"></div>
+  </div>
+
+  <p class="intro-desc">
+    Ce test intègre cinq cadres psychologiques validés scientifiquement : le modèle <strong>Big Five (OCEAN)</strong>, la <strong>théorie de l'attachement</strong>, les <strong>valeurs de Schwartz</strong>, l'<strong>intelligence émotionnelle</strong> et les <strong>styles cognitifs</strong>. Il vous livrera une cartographie fine et nuancée de votre personnalité.
+  </p>
+
+  <div class="intro-badges">
+    <span class="badge">Big Five · OCEAN</span>
+    <span class="badge">Attachement</span>
+    <span class="badge">Valeurs de Schwartz</span>
+    <span class="badge">Intelligence Émotionnelle</span>
+    <span class="badge">Styles Cognitifs</span>
+    <span class="badge">60 questions</span>
+    <span class="badge">~15 minutes</span>
+  </div>
+
+  <button class="btn-primary" onclick="startTest()">
+    ✦ &nbsp; Commencer l'exploration &nbsp; ✦
+  </button>
+
+  <p class="intro-note">Il n'y a pas de bonnes ou mauvaises réponses — soyez simplement honnête avec vous-même.</p>
+</div>
+
+<!-- ========== QUESTION ========== -->
+<div id="screen-question" class="screen">
+  <div class="progress-bar-wrap">
+    <div class="progress-bar-fill" id="progress-fill"></div>
+  </div>
+
+  <div class="question-header">
+    <div class="section-label" id="section-label">—</div>
+    <div class="question-counter" id="question-counter">Question 1 sur 60</div>
+  </div>
+
+  <div class="question-body question-transition" id="question-body">
+    <div class="question-icon" id="question-icon">○</div>
+    <div class="question-text" id="question-text">...</div>
+
+    <div class="scale-wrap">
+      <div class="scale-labels">
+        <span>Pas du tout d'accord</span>
+        <span>Tout à fait d'accord</span>
+      </div>
+      <div class="scale-options" id="scale-options">
+        <!-- buttons injected -->
+      </div>
+      <div class="scale-desc" id="scale-desc"></div>
+    </div>
+  </div>
+
+  <div class="nav-wrap">
+    <button class="btn-nav btn-prev" onclick="prevQuestion()">← Précédent</button>
+    <button class="btn-nav btn-next" id="btn-next" onclick="nextQuestion()" disabled>Suivant →</button>
+  </div>
+</div>
+
+<!-- ========== LOADING ========== -->
+<div id="screen-loading" class="screen">
+  <div class="loading-orb"></div>
+  <div class="loading-text">Analyse de votre profil en cours…</div>
+  <div class="loading-steps">
+    <div class="loading-step" id="step-1">Calcul des dimensions Big Five…</div>
+    <div class="loading-step" id="step-2">Analyse du style d'attachement…</div>
+    <div class="loading-step" id="step-3">Identification des valeurs fondamentales…</div>
+    <div class="loading-step" id="step-4">Évaluation de l'intelligence émotionnelle…</div>
+    <div class="loading-step" id="step-5">Détermination de l'archétype dominant…</div>
+  </div>
+</div>
+
+<!-- ========== RESULTS ========== -->
+<div id="screen-results" class="screen">
+
+  <!-- HERO -->
+  <div class="alchemic-hero reveal-section" id="res-hero">
+    <div class="ornament">✦ &nbsp; ✦ &nbsp; ✦</div>
+    <br>
+    <span class="alchemic-symbol" id="res-element-symbol">☿</span>
+    <div class="alchemic-element-name" id="res-element-name">—</div>
+    <div class="alchemic-latin" id="res-element-latin">—</div>
+    <h2 class="results-title" id="archetype-title">—</h2>
+    <div class="archetype-badge" id="archetype-subtitle">—</div>
+    <p class="archetype-desc" id="archetype-desc">—</p>
+  </div>
+
+  <!-- SCORE RINGS -->
+  <div class="reveal-section" id="res-rings" style="padding:0 1.5rem 1rem;">
+    <div class="section-title-main">Vue d'ensemble — Big Five</div>
+    <div class="score-ring-wrap" id="rings-wrap"></div>
+  </div>
+
+  <div style="padding: 0 1.5rem;">
+
+  <!-- BIG FIVE -->
+  <div class="reveal-section" id="res-b5">
+    <div class="divider"><div class="divider-line"></div><div class="divider-gem"></div><div class="divider-line"></div></div>
+    <div class="section-title-main">Traits de Personnalité — Big Five (OCEAN)</div>
+    <div class="dimensions-grid" id="big5-grid"></div>
+  </div>
+
+  <!-- ATTACHMENT -->
+  <div class="reveal-section" id="res-attach">
+    <div class="divider"><div class="divider-line"></div><div class="divider-gem"></div><div class="divider-line"></div></div>
+    <div class="section-title-main">Style d'Attachement — Bowlby · Ainsworth</div>
+    <div class="dimensions-grid" id="attach-grid"></div>
+  </div>
+
+  <!-- VALUES -->
+  <div class="reveal-section" id="res-values">
+    <div class="divider"><div class="divider-line"></div><div class="divider-gem"></div><div class="divider-line"></div></div>
+    <div class="section-title-main">Valeurs Fondamentales — Schwartz</div>
+    <div class="dimensions-grid" id="values-grid"></div>
+  </div>
+
+  <!-- EI + COGNITIVE -->
+  <div class="reveal-section" id="res-ei">
+    <div class="divider"><div class="divider-line"></div><div class="divider-gem"></div><div class="divider-line"></div></div>
+    <div class="section-title-main">Intelligence Émotionnelle & Style Cognitif</div>
+    <div class="dimensions-grid" id="ei-grid"></div>
+  </div>
+
+  <!-- ═══════ ALCHEMICAL SECTION ═══════ -->
+  <div class="reveal-section" id="res-alchemy">
+    <div class="divider"><div class="divider-line"></div><div class="divider-gem"></div><div class="divider-line"></div></div>
+    <div class="section-title-main">✦ &nbsp; Lecture Alchimique &nbsp; ✦</div>
+
+    <!-- Planetary ruler -->
+    <div class="planet-card" id="planet-card"></div>
+
+    <!-- Great Work personal statement -->
+    <div class="great-work-box" id="great-work-box"></div>
+
+    <!-- 4 Stages of the Great Work -->
+    <div class="section-title-main" style="margin-top:2rem;">Les Quatre Étapes de la Grande Œuvre</div>
+    <div class="stages-wrap" id="stages-wrap"></div>
+
+    <!-- Shadow work -->
+    <div class="section-title-main" style="margin-top:2rem;">L'Ombre — Ce qui reste à transmuter</div>
+    <div class="dimensions-grid" id="shadow-grid"></div>
+  </div>
+
+  <!-- INSIGHTS -->
+  <div class="reveal-section" id="res-insights">
+    <div class="divider"><div class="divider-line"></div><div class="divider-gem"></div><div class="divider-line"></div></div>
+    <div class="section-title-main">Synthèse · Insights personnalisés</div>
+    <div class="insights-grid" id="insights-grid"></div>
+  </div>
+
+  <!-- ACTION BAR -->
+  <div class="action-bar reveal-section" id="res-actions">
+    <div class="divider"><div class="divider-line"></div><div class="divider-gem"></div><div class="divider-line"></div></div>
+    <div class="section-title-main">Enregistrer &amp; Partager</div>
+    <div class="action-buttons">
+      <button class="btn-action btn-share" onclick="shareResult()">
+        <span class="btn-action-icon">🔗</span>
+        <span class="btn-action-label">Copier le lien</span>
+        <span class="btn-action-sub">Partager mon profil</span>
+      </button>
+      <button class="btn-action btn-image" onclick="downloadCard()">
+        <span class="btn-action-icon">🖼</span>
+        <span class="btn-action-label">Télécharger</span>
+        <span class="btn-action-sub">Carte de résultat</span>
+      </button>
+      <button class="btn-action btn-restart-new" onclick="restartTest()">
+        <span class="btn-action-icon">⟳</span>
+        <span class="btn-action-label">Recommencer</span>
+        <span class="btn-action-sub">Nouveau test</span>
+      </button>
+    </div>
+    <div class="share-toast" id="share-toast">Lien copie dans le presse-papier</div>
+  </div>
+
+  <br><br>
+  </div>
+</div>
+
+<canvas id="share-canvas" style="display:none"></canvas>
+
+<script>
+// =====================================================
+// DATA — 60 QUESTIONS
+// =====================================================
+const SCALE_DESCS = {
+  1: "Pas du tout d'accord",
+  2: "Plutôt pas d'accord",
+  3: "Ni l'un ni l'autre",
+  4: "Plutôt d'accord",
+  5: "Tout à fait d'accord"
+};
+
+const SECTIONS = {
+  big5_O: { label: "Ouverture à l'expérience", icon: "🌌", color: "#5a7fbf" },
+  big5_C: { label: "Conscienciosité", icon: "⚖️", color: "#7a9e7e" },
+  big5_E: { label: "Extraversion", icon: "☀️", color: "#d4924a" },
+  big5_A: { label: "Agréabilité", icon: "🌿", color: "#7a9e7e" },
+  big5_N: { label: "Névrosisme", icon: "🌊", color: "#8a6fbf" },
+  attach: { label: "Style d'attachement", icon: "🔗", color: "#bf7a6f" },
+  values: { label: "Valeurs de Schwartz", icon: "✨", color: "#c9a84c" },
+  ei: { label: "Intelligence émotionnelle", icon: "💎", color: "#6fbfbf" },
+  cognitive: { label: "Style cognitif", icon: "🧿", color: "#9f7abf" }
+};
+
+const questions = [
+  // ---- BIG FIVE: OPENNESS (12 questions) ----
+  { id:1, section:"big5_O", polarity:1, text:"J'aime explorer des idées nouvelles et inhabituelles, même si elles remettent en question mes convictions." },
+  { id:2, section:"big5_O", polarity:1, text:"La beauté des œuvres d'art, de la musique ou de la nature me touche profondément." },
+  { id:3, section:"big5_O", polarity:-1, text:"Je préfère les routines établies à l'imprévu et à la nouveauté." },
+  { id:4, section:"big5_O", polarity:1, text:"Mon imagination est fertile — il m'arrive souvent de me perdre dans des réflexions abstraites ou des rêveries." },
+  { id:5, section:"big5_O", polarity:1, text:"Je lis volontiers sur des sujets très différents : philosophie, sciences, arts, spiritualité…" },
+  { id:6, section:"big5_O", polarity:-1, text:"Je me sens rarement attiré(e) par les questions philosophiques ou métaphysiques." },
+  { id:7, section:"big5_O", polarity:1, text:"Je cherche à comprendre ce qui se passe en moi — mes émotions, mes motivations profondes." },
+  { id:8, section:"big5_O", polarity:1, text:"Quand je voyage ou découvre une nouvelle culture, je ressens une vraie curiosité et de l'émerveillement." },
+  { id:9, section:"big5_O", polarity:-1, text:"Je préfère les solutions éprouvées aux expériences risquées." },
+  { id:10, section:"big5_O", polarity:1, text:"Les ambiguïtés et les paradoxes m'intéressent plutôt qu'ils ne m'angoissent." },
+  { id:11, section:"big5_O", polarity:1, text:"J'ai un sens aigu de l'esthétique — la laideur ou la vulgarité me dérange." },
+  { id:12, section:"big5_O", polarity:-1, text:"Je me méfie des idées trop originales ou non conventionnelles." },
+
+  // ---- BIG FIVE: CONSCIENTIOUSNESS (10 questions) ----
+  { id:13, section:"big5_C", polarity:1, text:"Quand j'entreprends quelque chose, je mène toujours le projet jusqu'à son terme." },
+  { id:14, section:"big5_C", polarity:1, text:"Je planifie mes journées à l'avance et je respecte généralement mon programme." },
+  { id:15, section:"big5_C", polarity:-1, text:"Il m'arrive souvent de procrastiner des tâches importantes." },
+  { id:16, section:"big5_C", polarity:1, text:"Je fais attention aux détails — les erreurs, même petites, me dérangent." },
+  { id:17, section:"big5_C", polarity:1, text:"Je suis capable de résister à la tentation pour atteindre mes objectifs à long terme." },
+  { id:18, section:"big5_C", polarity:-1, text:"Mon espace de vie et de travail est souvent en désordre." },
+  { id:19, section:"big5_C", polarity:1, text:"J'assume pleinement mes responsabilités, même quand c'est difficile." },
+  { id:20, section:"big5_C", polarity:-1, text:"Je m'ennuie rapidement dans les tâches répétitives ou qui demandent de la persévérance." },
+  { id:21, section:"big5_C", polarity:1, text:"Avant d'agir, j'anticipe les conséquences possibles de mes décisions." },
+  { id:22, section:"big5_C", polarity:1, text:"Je tiens mes engagements, même lorsque les circonstances changent." },
+
+  // ---- BIG FIVE: EXTRAVERSION (8 questions) ----
+  { id:23, section:"big5_E", polarity:1, text:"En société, je suis souvent celui/celle qui lance les conversations et anime le groupe." },
+  { id:24, section:"big5_E", polarity:-1, text:"Après un long moment en groupe, j'ai besoin de solitude pour récupérer." },
+  { id:25, section:"big5_E", polarity:1, text:"Je me sens énergisé(e) par les interactions sociales et les rencontres nouvelles." },
+  { id:26, section:"big5_E", polarity:-1, text:"Je préfère les soirées calmes en petit comité aux grandes fêtes animées." },
+  { id:27, section:"big5_E", polarity:1, text:"J'aime être au centre de l'attention dans les contextes sociaux." },
+  { id:28, section:"big5_E", polarity:1, text:"Je n'hésite pas à exprimer mes enthousiasmes et mes émotions positives ouvertement." },
+  { id:29, section:"big5_E", polarity:-1, text:"Je ressens souvent le besoin de m'isoler pour réfléchir ou créer." },
+  { id:30, section:"big5_E", polarity:1, text:"Je m'adapte facilement et rapidement aux nouvelles personnes." },
+
+  // ---- BIG FIVE: AGREEABLENESS (6 questions) ----
+  { id:31, section:"big5_A", polarity:1, text:"Je m'intéresse sincèrement au bien-être des autres, même des inconnus." },
+  { id:32, section:"big5_A", polarity:1, text:"Quand quelqu'un est dans la détresse, je ressens naturellement de la compassion." },
+  { id:33, section:"big5_A", polarity:-1, text:"Je peux être assez direct(e), voire sévère, lorsque je considère que c'est nécessaire." },
+  { id:34, section:"big5_A", polarity:1, text:"J'évite les conflits et je cherche généralement des compromis." },
+  { id:35, section:"big5_A", polarity:-1, text:"Je n'ai aucun scrupule à défendre mes intérêts même si cela déçoit autrui." },
+  { id:36, section:"big5_A", polarity:1, text:"Je fais confiance aux gens a priori, avant qu'ils me donnent une raison de ne pas leur faire confiance." },
+
+  // ---- BIG FIVE: NEUROTICISM (6 questions) ----
+  { id:37, section:"big5_N", polarity:1, text:"Je me mets facilement à l'inquiétude, même pour des choses peu importantes." },
+  { id:38, section:"big5_N", polarity:1, text:"Mon humeur peut changer rapidement sans raison évidente." },
+  { id:39, section:"big5_N", polarity:-1, text:"Face aux situations stressantes, je reste généralement calme et posé(e)." },
+  { id:40, section:"big5_N", polarity:1, text:"Je me critique souvent et j'ai du mal à m'accepter tel(le) que je suis." },
+  { id:41, section:"big5_N", polarity:1, text:"Les émotions négatives — la tristesse, l'anxiété, la culpabilité — me touchent profondément." },
+  { id:42, section:"big5_N", polarity:-1, text:"Je rebondis rapidement après un échec ou une déception." },
+
+  // ---- ATTACHMENT (6 questions) ----
+  { id:43, section:"attach", polarity:1, text:"J'ai besoin de beaucoup de réassurance émotionnelle de la part de mes proches.", sub:"anxious" },
+  { id:44, section:"attach", polarity:1, text:"Quand une relation devient trop proche, j'ai tendance à prendre de la distance.", sub:"avoidant" },
+  { id:45, section:"attach", polarity:-1, text:"Je me sens à l'aise pour dépendre des autres et les laisser dépendre de moi.", sub:"secure" },
+  { id:46, section:"attach", polarity:1, text:"J'ai peur d'être abandonné(e) ou rejeté(e) par les gens que j'aime.", sub:"anxious" },
+  { id:47, section:"attach", polarity:-1, text:"L'intimité émotionnelle me semble naturelle et confortable.", sub:"secure" },
+  { id:48, section:"attach", polarity:1, text:"Je préfère ne pas trop compter sur les autres — la self-reliance est importante pour moi.", sub:"avoidant" },
+
+  // ---- VALUES — SCHWARTZ (6 questions) ----
+  { id:49, section:"values", polarity:1, text:"La réussite personnelle et la reconnaissance de mes accomplissements me motivent profondément.", sub:"achievement" },
+  { id:50, section:"values", polarity:1, text:"Le bien-être de ma communauté et de l'humanité compte plus que mon confort personnel.", sub:"universalism" },
+  { id:51, section:"values", polarity:1, text:"La liberté — d'agir, de penser, de choisir — est une valeur fondamentale pour moi.", sub:"self-direction" },
+  { id:52, section:"values", polarity:1, text:"Je respecte les traditions et les conventions transmises par mes ancêtres ou ma culture.", sub:"tradition" },
+  { id:53, section:"values", polarity:1, text:"Les nouvelles expériences, les risques et les découvertes me font vibrer.", sub:"stimulation" },
+  { id:54, section:"values", polarity:1, text:"Je donne beaucoup d'importance à la sécurité — personnelle, familiale, sociale.", sub:"security" },
+
+  // ---- EMOTIONAL INTELLIGENCE (6 questions) ----
+  { id:55, section:"ei", polarity:1, text:"Je reconnais facilement ce que je ressens et pourquoi je le ressens." },
+  { id:56, section:"ei", polarity:1, text:"Même dans les moments difficiles, je suis capable de réguler mes émotions et de rester fonctionnel(le)." },
+  { id:57, section:"ei", polarity:1, text:"Je perçois intuitivement les états émotionnels des autres, souvent sans qu'ils le disent." },
+  { id:58, section:"ei", polarity:1, text:"Je sais utiliser mes émotions pour me motiver et atteindre mes objectifs." },
+  { id:59, section:"ei", polarity:-1, text:"Les conflits émotionnels m'épuisent au point de me paralyser." },
+  { id:60, section:"cognitive", polarity:1, text:"Je fonctionne plutôt par intuition et synthèse globale que par analyse linéaire et détaillée." }
+];
+
+// =====================================================
+// STATE
+// =====================================================
+let currentQ = 0;
+let answers = {};
+
+function startTest() {
+  showScreen('question');
+  renderQuestion();
+}
+
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + name).classList.add('active');
+}
+
+function renderQuestion() {
+  const q = questions[currentQ];
+  const sec = SECTIONS[q.section];
+
+  document.getElementById('section-label').textContent = sec.label;
+  document.getElementById('question-icon').textContent = sec.icon;
+  document.getElementById('question-counter').textContent = `Question ${currentQ + 1} sur ${questions.length}`;
+
+  const body = document.getElementById('question-body');
+  body.classList.remove('question-transition');
+  void body.offsetWidth;
+  body.classList.add('question-transition');
+
+  document.getElementById('question-text').textContent = `« ${q.text} »`;
+
+  // Progress
+  document.getElementById('progress-fill').style.width = `${(currentQ / questions.length) * 100}%`;
+
+  // Scale buttons
+  const opts = document.getElementById('scale-options');
+  opts.innerHTML = '';
+  for (let v = 1; v <= 5; v++) {
+    const btn = document.createElement('button');
+    btn.className = 'scale-btn' + (answers[q.id] === v ? ' selected' : '');
+    btn.textContent = v;
+    btn.onclick = () => selectAnswer(q.id, v);
+    opts.appendChild(btn);
+  }
+
+  document.getElementById('scale-desc').textContent =
+    answers[q.id] ? SCALE_DESCS[answers[q.id]] : '';
+
+  document.getElementById('btn-next').disabled = !answers[q.id];
+}
+
+function selectAnswer(qid, val) {
+  answers[qid] = val;
+
+  // Flash selected button immediately
+  const btns = document.querySelectorAll('.scale-btn');
+  btns.forEach((b, i) => {
+    b.classList.toggle('selected', i + 1 === val);
+  });
+  document.getElementById('scale-desc').textContent = SCALE_DESCS[val];
+
+  // Particle burst
+  spawnParticles(val);
+
+  // Auto-advance after short delay
+  setTimeout(() => {
+    if (currentQ < questions.length - 1) {
+      currentQ++;
+      renderQuestion();
+    } else {
+      computeResults();
+    }
+  }, 420);
+}
+
+function spawnParticles(val) {
+  const colors = ['#d4a843','#e8c97a','#ffffff','#a0c0e0','#c04030'];
+  const c = colors[val - 1];
+  const wrap = document.getElementById('question-body');
+  for (let i = 0; i < 10; i++) {
+    const p = document.createElement('span');
+    p.style.cssText = `
+      position:absolute;width:5px;height:5px;border-radius:50%;
+      background:${c};pointer-events:none;z-index:999;
+      left:50%;top:50%;
+      animation:particle 0.7s ease-out forwards;
+      --dx:${(Math.random()-0.5)*140}px;
+      --dy:${(Math.random()-0.5)*100}px;
+    `;
+    wrap.appendChild(p);
+    setTimeout(() => p.remove(), 800);
+  }
+}
+
+function prevQuestion() {
+  if (currentQ > 0) { currentQ--; renderQuestion(); }
+}
+
+function nextQuestion() {
+  if (currentQ < questions.length - 1) {
+    currentQ++;
+    renderQuestion();
+  } else {
+    computeResults();
+  }
+}
+
+// =====================================================
+// COMPUTE
+// =====================================================
+function getScore(section, sub) {
+  const qs = questions.filter(q =>
+    q.section === section && (sub ? q.sub === sub : true)
+  );
+  if (!qs.length) return 50;
+  let total = 0;
+  qs.forEach(q => {
+    const raw = answers[q.id] || 3;
+    total += q.polarity === 1 ? raw : (6 - raw);
+  });
+  return Math.round((total / qs.length - 1) / 4 * 100);
+}
+
+function computeResults() {
+  showScreen('loading');
+  const steps = [1,2,3,4,5];
+  steps.forEach((s, i) => {
+    setTimeout(() => {
+      document.getElementById('step-' + s).classList.add('show');
+    }, i * 600);
+  });
+
+  setTimeout(() => {
+    const scores = {
+      O: getScore('big5_O'),
+      C: getScore('big5_C'),
+      E: getScore('big5_E'),
+      A: getScore('big5_A'),
+      N: getScore('big5_N'),
+      attach_anxious: getScore('attach', 'anxious'),
+      attach_avoidant: getScore('attach', 'avoidant'),
+      attach_secure: 100 - Math.round((getScore('attach','anxious') + getScore('attach','avoidant')) / 2),
+      val_achievement: getScore('values', 'achievement'),
+      val_universalism: getScore('values', 'universalism'),
+      val_self: getScore('values', 'self-direction'),
+      val_tradition: getScore('values', 'tradition'),
+      val_stimulation: getScore('values', 'stimulation'),
+      val_security: getScore('values', 'security'),
+      ei: getScore('ei'),
+      cognitive: getScore('cognitive')
+    };
+    renderResults(scores);
+  }, 3500);
+}
+
+// =====================================================
+// RENDER RESULTS
+// =====================================================
+function getArchetype(s) {
+  const top = Object.entries({O:s.O,C:s.C,E:s.E,A:s.A}).sort((a,b)=>b[1]-a[1])[0][0];
+  const archetypes = {
+    O: { title: "L'Alchimiste", sub: "Esprit ouvert · Chercheur de sens", desc: "Vous êtes guidé(e) par une curiosité insatiable et un désir profond de comprendre le monde dans sa complexité. Votre imagination fertile et votre sensibilité esthétique vous permettent de percevoir des connexions là où d'autres ne voient que du chaos. Vous avancez à travers la vie comme un alchimiste : transformant l'ordinaire en extraordinaire, le plomb de l'expérience en or de la compréhension." },
+    C: { title: "L'Architecte", sub: "Esprit structuré · Bâtisseur de réalités", desc: "Vous incarnez la discipline, la précision et la vision à long terme. Là où d'autres s'éparpillent, vous construisez avec méthode. Votre force réside dans votre capacité à transformer une intention en réalité tangible, pierre après pierre, avec intégrité et persévérance. Vous êtes celui qui donne forme au possible." },
+    E: { title: "Le Catalyseur", sub: "Esprit social · Animateur de mondes", desc: "Vous portez une énergie communicative qui attire et fédère. Votre enthousiasme est contagieux, votre présence dynamisante. Vous ne regardez pas le monde : vous y participez pleinement, avec chaleur, spontanéité et une capacité naturelle à créer des liens là où il n'y avait que des étrangers." },
+    A: { title: "Le Gardien", sub: "Esprit bienveillant · Tisserand de liens", desc: "Votre force tranquille est votre empathie profonde. Vous percevez la souffrance des autres avant même qu'elle soit exprimée. Nourrir, protéger, réconcilier — c'est votre vocation naturelle. Vous êtes le cœur du réseau, celui ou celle sans qui les liens se déferaient, et grâce à qui les êtres grandissent." }
+  };
+  return { ...archetypes[top], key: top };
+}
+
+// ---- ALCHEMICAL ENGINE ----
+function getAlchemicalElement(s) {
+  // Map OCEAN profile to the 4 classical elements + quintessence
+  const O = s.O, C = s.C, E = s.E, A = s.A, N = s.N;
+
+  const scores = {
+    Feu:   Math.round((E * 0.4 + O * 0.3 + (100-C) * 0.15 + N * 0.15)),
+    Eau:   Math.round((A * 0.35 + N * 0.3 + (100-E) * 0.2 + O * 0.15)),
+    Air:   Math.round((O * 0.4 + E * 0.25 + (100-N) * 0.2 + A * 0.15)),
+    Terre: Math.round((C * 0.45 + (100-O) * 0.25 + A * 0.2 + (100-E) * 0.1))
+  };
+
+  const top = Object.entries(scores).sort((a,b)=>b[1]-a[1])[0][0];
+
+  const elements = {
+    Feu: {
+      symbol: '🜂', latin: 'Ignis', color: '#e07040',
+      planet: { name: 'Mars · Sol', symbol: '♂☉', desc: "Votre âme porte l'empreinte de Mars — la volonté, l'action, la conquête — tempérée par le Sol, l'or intérieur, la conscience lumineuse. Vous êtes né(e) pour agir et rayonner. Votre danger : brûler sans éclairer. Votre grâce : consumer ce qui est mort pour laisser place au neuf." },
+      elementDesc: "Le Feu est votre élément dominant. Vous êtes un être d'élan, d'enthousiasme et de vision. Comme la flamme, vous illuminez l'espace autour de vous, mais vous avez besoin d'être nourri(e) pour ne pas vous consumer. Votre puissance est dans l'initiation — donner vie à ce qui n'existe pas encore.",
+      greatWork: "Votre Grande Œuvre est la Sublimation : transformer l'élan brut en lumière consciente. Vous avez le feu — apprenez à le conduire sans le perdre.",
+    },
+    Eau: {
+      symbol: '🜄', latin: 'Aqua', color: '#4080b0',
+      planet: { name: 'Lune · Vénus', symbol: '☽♀', desc: "La Lune régit vos flux intérieurs — intuitions, mémoires, marées émotionnelles. Vénus y ajoute le sens du beau, du lien, de l'harmonie. Ensemble, elles font de vous un être profondément réceptif, capable de ressentir ce que les autres ignorent en eux-mêmes." },
+      elementDesc: "L'Eau est votre élément dominant. Vous êtes un être de profondeur, d'intuition et d'empathie. Comme l'eau, vous prenez la forme de tout ce qui vous contient — ce qui est un don et parfois un danger. Votre richesse est dans votre capacité à sentir le monde au lieu de seulement le penser.",
+      greatWork: "Votre Grande Œuvre est la Dissolution : lâcher les formes figées, vous dissoudre pour mieux vous recomposer. Ce qui résiste en vous est exactement ce qui doit fondre.",
+    },
+    Air: {
+      symbol: '🜁', latin: 'Aer', color: '#80b0c0',
+      planet: { name: 'Mercure · Jupiter', symbol: '☿♃', desc: "Mercure est le messager des dieux — esprit vif, connexions, langage, transmutation des idées. Jupiter y ajoute l'expansion, la sagesse, la synthèse du grand tout. Vous êtes fait(e) pour relier les mondes, trouver les patterns, nommer ce que les autres pressentent sans pouvoir le dire." },
+      elementDesc: "L'Air est votre élément dominant. Vous êtes un être de pensée, de mouvement, de communication et de connexion. Comme l'air, vous êtes partout à la fois — curieux, adaptable, difficile à saisir. Votre force est dans la vision synoptique, dans la capacité à voir les liens invisibles.",
+      greatWork: "Votre Grande Œuvre est la Séparation : apprendre à distinguer l'essentiel du superficiel, à ne pas vous disperser dans tous les vents, à ancrer vos idées dans le réel.",
+    },
+    Terre: {
+      symbol: '🜃', latin: 'Terra', color: '#806040',
+      planet: { name: 'Saturne · Vénus', symbol: '♄♀', desc: "Saturne — le Vieux Sage, le Temps, la structure, l'épreuve — est votre planète maîtresse. Vénus y apporte la sensibilité au beau et au juste. Ensemble, ils font de vous un bâtisseur patient, capable de durée, qui sait que la vraie valeur se construit lentement." },
+      elementDesc: "La Terre est votre élément dominant. Vous êtes un être de substance, de patience et de profondeur enracinée. Comme la terre, vous êtes le support sur lequel les autres peuvent prendre appui. Votre richesse est dans la durée, la fiabilité, la capacité à faire pousser des choses concrètes là où d'autres ne voient que terrain vague.",
+      greatWork: "Votre Grande Œuvre est la Coagulation : donner corps et forme durables à vos intentions. Votre défi n'est pas de penser — c'est de persister jusqu'à ce que l'œuvre soit accomplie.",
+    }
+  };
+
+  return { ...elements[top], name: top, scores };
+}
+
+function getAlchemicalStages(s, elem) {
+  // Score each stage based on dimensions
+  const nigScore = s.N;           // Névrosisme = matière première / chaos intérieur
+  const albScore = s.ei;          // IE = clarification, conscience
+  const citScore = s.O;           // Ouverture = illumination, discernement
+  const rubScore = Math.round((s.C + s.A + (100-s.N)) / 3); // intégration = rubedo
+
+  const levelLabel = (v) =>
+    v >= 70 ? "Accompli" : v >= 50 ? "En cours" : v >= 30 ? "Émergent" : "À initier";
+
+  return [
+    {
+      cls: 'nigredo', symbol: '🌑', name: 'Nigredo', latin: 'La Putréfaction',
+      score: nigScore,
+      desc: `Le Nigredo est le stade de la matière première — la confrontation avec l'ombre, le chaos, ce qui en vous doit mourir avant de renaître. Votre score de ${nigScore}% reflète votre degré de contact avec votre profondeur brute. ${nigScore >= 55 ? "Vous avez traversé ou traversez des zones d'ombre significatives — c'est la matière première de toute transmutation authentique. Ce que vous appelez vos failles est exactement ce que l'alchimiste cherche." : "Votre relation à votre ombre est encore douce. Là où vous évitez la confrontation intérieure, se cache souvent le minerai le plus précieux."}`,
+      level: levelLabel(nigScore)
+    },
+    {
+      cls: 'albedo', symbol: '🌕', name: 'Albedo', latin: 'La Purification',
+      score: albScore,
+      desc: `L'Albedo est le stade du blanchiment — la clarification, la lucidité sur soi, la capacité à voir ses propres mécanismes sans s'y perdre. Votre intelligence émotionnelle (${albScore}%) en est l'indicateur principal. ${albScore >= 60 ? "Vous avez une réelle capacité à vous observer de l'intérieur — à reconnaître vos états sans vous y confondre. C'est le début de la liberté intérieure." : "Développer votre conscience émotionnelle est votre priorité alchimique actuelle. Sans la clarté de l'Albedo, le Feu de l'action brûle à l'aveugle."}`,
+      level: levelLabel(albScore)
+    },
+    {
+      cls: 'citrinitas', symbol: '🌟', name: 'Citrinitas', latin: "L'Illumination",
+      score: citScore,
+      desc: `La Citrinitas — l'étape oubliée — est celle de l'or qui commence à poindre : l'élargissement de la conscience, la vision qui s'ouvre au-delà de soi. Votre ouverture d'esprit (${citScore}%) en est le reflet direct. ${citScore >= 65 ? "Vous êtes naturellement orienté(e) vers cet état de curiosité lumineuse — vous cherchez le sens derrière les formes, les patterns derrière les événements. L'or commence à briller en vous." : "La Citrinitas vous invite à cultiver votre curiosité, à chercher activement ce qui vous dépasse et vous inspire."}`,
+      level: levelLabel(citScore)
+    },
+    {
+      cls: 'rubedo', symbol: '🔴', name: 'Rubedo', latin: "L'Accomplissement",
+      score: rubScore,
+      desc: `Le Rubedo est la rougeur finale — l'intégration totale, la réalisation de la Pierre Philosophale en soi : être pleinement soi, dans toutes les dimensions, sans conflit entre l'idéal et la vie concrète. Votre score d'intégration (${rubScore}%) reflète l'harmonie entre vos différentes forces. ${rubScore >= 65 ? "Vous approchez d'un niveau d'intégration remarquable — vos forces sont relativement alignées, vos ombres en voie d'assimilation. Le Rubedo se dessine à l'horizon." : "L'intégration est votre œuvre en cours. Le Rubedo n'est jamais définitivement acquis — c'est une orientation, pas une destination."}`,
+      level: levelLabel(rubScore)
+    }
+  ];
+}
+
+function getShadow(s) {
+  const shadows = [];
+  if (s.O > 70 && s.C < 45) shadows.push({ title: "L'Icarien", desc: "Votre imagination élève vos visions si haut qu'elles peinent parfois à toucher terre. L'ombre ici : l'œuvre rêvée qui ne se réalise jamais. La transmutation : apprendre à construire un pont entre la vision et l'acte, un pas concret à la fois." });
+  if (s.N > 60 && s.ei < 55) shadows.push({ title: "La Marée intérieure", desc: "Votre intensité émotionnelle peut devenir une force submersive si elle n'est pas canalisée. L'ombre : les émotions qui gouvernent là où vous aimeriez choisir. La transmutation : faire de vos émotions des instruments de navigation, non des tempêtes." });
+  if (s.A > 70 && s.N > 55) shadows.push({ title: "Le Gardien épuisé", desc: "Vous donnez généreusement aux autres ce que vous vous refusez à vous-même. L'ombre : l'oubli de soi, le don qui cache un manque. La transmutation : apprendre à recevoir avec autant de grâce que vous offrez." });
+  if (s.E < 35) shadows.push({ title: "L'Ermite sans carte", desc: "Votre monde intérieur est riche, mais il peut devenir une citadelle. L'ombre : l'isolement qui se prend pour de la profondeur. La transmutation : laisser certains élus entrer dans votre jardin secret." });
+  if (s.C > 75 && s.O < 45) shadows.push({ title: "L'Architecte figé", desc: "Votre maîtrise de la forme peut étouffer l'imprévu — or c'est dans l'imprévu que vit la vie. L'ombre : le perfectionnisme qui empêche d'avancer. La transmutation : accepter que l'œuvre inachevée ait sa propre beauté." });
+  if (shadows.length === 0) shadows.push({ title: "L'Équilibre fragile", desc: "Votre profil est relativement harmonieux — mais l'équilibre parfait peut être l'ombre elle-même. La tentation de ne rien brusquer, de tout maintenir en place, peut empêcher la métamorphose. La transmutation : oser le déséquilibre créateur." });
+  return shadows.slice(0, 3);
+}
+
+function renderDimCard(name, score, pole1, pole2, desc, color) {
+  return `<div class="dimension-card" style="--dim-color:${color||'var(--or)'}">
+    <div class="dim-header">
+      <div class="dim-name">${name}</div>
+      <div class="dim-score-label">${score}%</div>
+    </div>
+    <div class="dim-bar-wrap"><div class="dim-bar-fill" data-target="${score}"></div></div>
+    <div class="dim-poles"><span>${pole1}</span><span>${pole2}</span></div>
+    <div class="dim-desc">${desc}</div>
+  </div>`;
+}
+
+function getB5Desc(dim, score) {
+  const descs = {
+    O: score >= 65 ? "Esprit ouvert, curieux, imaginatif. Vous cherchez activement la nouveauté et aimez explorer des idées complexes. Votre sensibilité esthétique est prononcée — la beauté du monde vous affecte réellement. Vous êtes à l'aise avec l'abstraction, la métaphore, le symbole." :
+       score >= 40 ? "Vous oscillez entre curiosité et pragmatisme selon les contextes. Vous appréciez certaines nouveautés sans rejeter les structures établies. Votre ouverture est sélective — une qualité souvent sous-estimée." :
+       "Vous préférez le concret, le familier et l'éprouvé. Pragmatique et ancré(e), vous vous méfiez des idées trop abstraites. Votre force : vous ne vous perdez pas dans les spéculations.",
+    C: score >= 65 ? "Discipliné(e), organisé(e), fiable. Vous planifiez, vous tenez vos engagements et allez jusqu'au bout de vos projets. Votre parole compte. Votre environnement reflète votre ordre intérieur." :
+       score >= 40 ? "Vous avez la capacité de vous organiser, mais pouvez aussi vous laisser porter par l'instant. Cette flexibilité peut être un atout créatif quand elle est choisie plutôt que subie." :
+       "Vous fonctionnez bien dans le flux et l'improvisation. Les structures rigides peuvent vous étouffer. Votre spontanéité est précieuse mais peut mener à la dispersion si elle n'est pas cultivée avec soin.",
+    E: score >= 65 ? "Extraverti(e), sociable, expressif(ve). Vous puisez votre énergie dans les interactions et aimez vous exprimer. Les situations sociales vous dynamisent — vous vous ennuyez dans la solitude prolongée." :
+       score >= 40 ? "Ambivert : à l'aise aussi bien seul(e) qu'en groupe selon le contexte et votre énergie du moment. Vous adaptez finement votre engagement social — c'est une intelligence rare." :
+       "Introverti(e) affirmé(e). Vous trouvez votre énergie dans la solitude et la profondeur plutôt que dans la multiplicité des échanges. Votre monde intérieur est d'une grande richesse.",
+    A: score >= 65 ? "Empathique, coopératif(ve), bienveillant(e). Vous vous souciez genuinement des autres et cherchez l'harmonie dans vos relations. Vous pouvez parfois négliger vos propres besoins au profit de ceux d'autrui." :
+       score >= 40 ? "Vous savez à la fois vous montrer doux(ce) et assertif(ve) selon les besoins. Vous n'êtes ni trop accommodant(e) ni trop dur(e) — un équilibre précieux dans les relations." :
+       "Direct(e), assertif(ve), compétitif(ve). Vous défendez vos positions sans hésiter. Votre franchise peut parfois blesser, mais votre authenticité et votre clarté sont précieuses.",
+    N: score >= 65 ? "Émotionnellement réactif(ve) et sensible. Vous ressentez intensément, ce qui peut générer de l'anxiété mais aussi une grande profondeur intérieure et une vie émotionnelle extraordinairement riche. C'est la matière première des grandes créations." :
+       score >= 40 ? "Vous avez un niveau modéré de réactivité émotionnelle — sensible sans être submergé(e). Un bon équilibre entre ressenti et maîtrise, qui vous permet de fonctionner efficacement même sous pression." :
+       "Émotionnellement stable et résilient(e). Vous faites face aux situations difficiles avec calme et recul. Peu de choses vous déstabilisent durablement. Votre sérénité est une ressource pour ceux qui vous entourent."
+  };
+  return descs[dim];
+}
+
+function getAttachDesc(score_a, score_av) {
+  if (score_a > 65) return { label: "Anxieux-Préoccupé", desc: "Vous avez un fort besoin d'intimité et de réassurance, mais craignez d'être abandonné(e) ou de ne pas être suffisamment aimé(e). Vos relations sont intenses et émotionnellement chargées — vous vivez pleinement, mais parfois douloureusement. Ce style est souvent lié à des expériences d'inconsistance affective précoce. Il recèle une formidable capacité d'amour — à condition de ne plus la subordonner à la peur." };
+  if (score_av > 65) return { label: "Évitant-Détaché", desc: "Vous valorisez fortement votre autonomie et avez tendance à maintenir une distance émotionnelle dans vos relations proches. L'intimité peut vous mettre mal à l'aise, voire vous faire fuir. Ce style protège souvent contre une ancienne vulnérabilité. Votre indépendance est réelle et précieuse — et elle peut coexister avec une vraie capacité d'attachement si vous choisissez de l'explorer." };
+  return { label: "Sécure", desc: "Vous êtes généralement à l'aise avec l'intimité et l'interdépendance. Vous faites confiance sans vous perdre, vous vous sentez globalement digne d'être aimé(e) et capable d'aimer en retour. C'est le style d'attachement le plus favorable aux relations épanouissantes — et il reste un travail vivant, non un acquis définitif." };
+}
+
+function renderScoreRing(label, score, color) {
+  const r = 28, circ = 2 * Math.PI * r;
+  const dash = (score / 100) * circ;
+  return `<div class="score-ring">
+    <svg width="70" height="70" viewBox="0 0 70 70">
+      <circle cx="35" cy="35" r="${r}" fill="none" stroke="rgba(212,168,67,0.1)" stroke-width="4"/>
+      <circle cx="35" cy="35" r="${r}" fill="none" stroke="${color}" stroke-width="4"
+        stroke-dasharray="${dash} ${circ}" stroke-linecap="round"
+        style="transition:stroke-dasharray 1.5s ease"/>
+      <text x="35" y="39" text-anchor="middle" fill="${color}"
+        font-family="Cormorant Garamond,serif" font-size="13">${score}%</text>
+    </svg>
+    <div class="score-ring-label">${label}</div>
+  </div>`;
+}
+
+function renderResults(s) {
+  lastScores = s;
+  showScreen('results');
+  document.getElementById('screen-results').scrollTop = 0;
+  window.scrollTo(0, 0);
+
+  const arch = getArchetype(s);
+  const elem = getAlchemicalElement(s);
+
+  // Hero
+  document.getElementById('res-element-symbol').textContent = elem.symbol;
+  document.getElementById('res-element-name').textContent = `Élément · ${elem.name}`;
+  document.getElementById('res-element-latin').textContent = elem.latin;
+  document.getElementById('archetype-title').textContent = arch.title;
+  document.getElementById('archetype-subtitle').textContent = arch.sub;
+  document.getElementById('archetype-desc').textContent = arch.desc;
+
+  // Score rings
+  document.getElementById('rings-wrap').innerHTML = [
+    renderScoreRing('Ouverture', s.O, '#7090c0'),
+    renderScoreRing('Conscienc.', s.C, '#70a080'),
+    renderScoreRing('Extraver.', s.E, '#c08040'),
+    renderScoreRing('Agréabil.', s.A, '#a07070'),
+    renderScoreRing('Stabilité', 100-s.N, '#9070c0'),
+    renderScoreRing('IE', s.ei, '#50b0b0'),
+  ].join('');
+
+  // BIG FIVE
+  document.getElementById('big5-grid').innerHTML = [
+    renderDimCard("Ouverture à l'expérience", s.O, "Conventionnel", "Créatif & Curieux", getB5Desc('O', s.O), "#5a7fbf"),
+    renderDimCard("Conscienciosité", s.C, "Spontané", "Organisé & Discipliné", getB5Desc('C', s.C), "#7a9e7e"),
+    renderDimCard("Extraversion", s.E, "Introverti", "Extraverti & Social", getB5Desc('E', s.E), "#d4924a"),
+    renderDimCard("Agréabilité", s.A, "Direct & Assertif", "Empathique & Coopératif", getB5Desc('A', s.A), "#9e7a7a"),
+    renderDimCard("Stabilité émotionnelle", 100-s.N, "Très réactif", "Stable & Résilient", getB5Desc('N', s.N), "#8a6fbf")
+  ].join('');
+
+  // ATTACHMENT
+  const att = getAttachDesc(s.attach_anxious, s.attach_avoidant);
+  document.getElementById('attach-grid').innerHTML = [
+    renderDimCard("Style dominant · " + att.label, Math.max(s.attach_secure, s.attach_anxious, s.attach_avoidant), "Insécure", "Sécure", att.desc, "#bf7a6f"),
+    renderDimCard("Anxiété d'attachement", s.attach_anxious, "Faible", "Élevée", "Mesure votre crainte du rejet, votre hypervigilance aux signaux relationnels et votre besoin de réassurance dans les liens proches. Une anxiété élevée révèle souvent une grande capacité d'amour mal canalisée.", "#bf7a6f"),
+    renderDimCard("Évitement de l'intimité", s.attach_avoidant, "Faible", "Élevé", "Reflète votre inconfort avec la proximité émotionnelle, votre tendance à l'autosuffisance défensive et à maintenir une distance intérieure même dans vos relations les plus proches.", "#bf9a7a")
+  ].join('');
+
+  // VALUES
+  const topVal = ['achievement','universalism','self-direction','tradition','stimulation','security']
+    .map(k => ({ k, v: s['val_' + k] || 50 }))
+    .sort((a,b) => b.v - a.v);
+
+  const valData = {
+    achievement: { l:"Réussite & Excellence", p1:"Modestie", p2:"Ambition", d:"La valeur d'accomplissement guide vos décisions vers la performance, la compétence et la reconnaissance de vos réalisations. Elle alimente votre moteur interne et votre désir de laisser une trace." },
+    universalism: { l:"Universalisme & Justice", p1:"Égocentrisme", p2:"Altruisme", d:"Vous portez une préoccupation profonde pour le bien commun, l'équité et la protection de toutes les formes de vie. Cette valeur vous engage naturellement dans les causes qui dépassent votre intérêt personnel." },
+    "self-direction": { l:"Autonomie & Liberté", p1:"Conformité", p2:"Indépendance", d:"La liberté de penser et d'agir par vous-même est fondamentale. Vous résistez à tout ce qui contraint votre trajectoire propre, et vous vous épanouissez dans les espaces où vous pouvez être pleinement auteur de votre vie." },
+    tradition: { l:"Tradition & Continuité", p1:"Modernité", p2:"Enracinement", d:"Vous accordez de l'importance aux héritages, aux rituels et à la continuité entre les générations. La tradition n'est pas pour vous un frein mais un ancrage — une mémoire vivante qui donne du sens au présent." },
+    stimulation: { l:"Stimulation & Intensité", p1:"Routine", p2:"Aventure", d:"Vous êtes attiré(e) par la nouveauté, le risque mesuré et les expériences intenses. La monotonie vous affecte profondément. Vous avez besoin de vivifier régulièrement votre existence pour vous sentir pleinement vivant(e)." },
+    security: { l:"Sécurité & Stabilité", p1:"Risque", p2:"Protection", d:"La sécurité — personnelle, familiale, sociale — est une valeur centrale dans vos choix. Vous bâtissez des espaces de protection et de stabilité pour vous et pour ceux que vous aimez, et vous ressentez un besoin réel de prévisibilité." }
+  };
+
+  document.getElementById('values-grid').innerHTML = topVal.slice(0, 4).map(({k, v}) => {
+    const d = valData[k];
+    return renderDimCard(d.l, v, d.p1, d.p2, d.d, "#c9a84c");
+  }).join('');
+
+  // EI + COGNITIVE
+  document.getElementById('ei-grid').innerHTML = [
+    renderDimCard("Intelligence Émotionnelle", s.ei, "Faible", "Élevée",
+      s.ei >= 65 ? "Vous êtes doté(e) d'une conscience émotionnelle fine et d'une réelle capacité à réguler vos états intérieurs. Vous percevez les émotions des autres avec précision, souvent avant qu'ils les expriment. Vous utilisez cette sensibilité comme outil de navigation dans vos relations et vos décisions." :
+      s.ei >= 40 ? "Votre intelligence émotionnelle est dans une zone intermédiaire fonctionnelle. Vous gérez généralement bien vos émotions, avec quelques points de fragilité dans les situations à forte charge émotionnelle ou conflictuelle." :
+      "L'identification et la régulation émotionnelle sont encore des zones de développement importantes pour vous. La bonne nouvelle : l'intelligence émotionnelle se cultive activement — par la pleine conscience, le journaling, la thérapie, la pratique relationnelle.", "#6fbfbf"),
+    renderDimCard("Style Cognitif", s.cognitive, "Analytique·Linéaire", "Intuitif·Synthétique",
+      s.cognitive >= 65 ? "Vous fonctionnez par intuition et vision globale. Vous saisissez les patterns, les connexions et les métaphores avant l'analyse détaillée. Votre pensée est systémique, associative, créatrice. Vous risquez parfois de sauter des étapes — et de perdre ceux qui raisonnent linéairement." :
+      s.cognitive >= 40 ? "Vous combinez analyse et intuition selon le contexte — une flexibilité cognitive précieuse. Vous pouvez passer du mode séquentiel au mode synthétique selon ce que la situation demande." :
+      "Vous pensez de manière analytique et séquentielle. Vous décomposez, vérifiez, structurez. C'est une force remarquable pour la résolution de problèmes complexes, la rigueur intellectuelle et la fiabilité opérationnelle.", "#9f7abf")
+  ].join('');
+
+  // ---- ALCHEMICAL ----
+  // Planet card
+  const pl = elem.planet;
+  document.getElementById('planet-card').innerHTML = `
+    <div class="planet-symbol">${pl.symbol}</div>
+    <div class="planet-body">
+      <div class="planet-name">Planète maîtresse · ${pl.name}</div>
+      <div class="planet-desc">${pl.desc}</div>
+    </div>`;
+
+  // Element desc + great work
+  document.getElementById('great-work-box').innerHTML = `
+    <div class="great-work-title">✦ &nbsp; Votre Grande Œuvre Personnelle &nbsp; ✦</div>
+    <div class="great-work-statement">${elem.greatWork}</div>
+    <div class="great-work-body">${elem.elementDesc}</div>`;
+
+  // Stages
+  const stages = getAlchemicalStages(s, elem);
+  document.getElementById('stages-wrap').innerHTML = stages.map(st => `
+    <div class="stage-card stage-${st.cls}">
+      <div class="stage-orb">${st.symbol}</div>
+      <div class="stage-body">
+        <div class="stage-name">${st.name}</div>
+        <div class="stage-latin">${st.latin}</div>
+        <div class="stage-desc">${st.desc}</div>
+        <span class="stage-level">${st.level} — ${st.score}%</span>
+      </div>
+    </div>`).join('');
+
+  // Shadow
+  const shadows = getShadow(s);
+  document.getElementById('shadow-grid').innerHTML = shadows.map(sh => `
+    <div class="dimension-card">
+      <div class="dim-header">
+        <div class="dim-name" style="color:#c07060">${sh.title}</div>
+        <div style="font-size:1.5rem">🌑</div>
+      </div>
+      <div class="dim-desc">${sh.desc}</div>
+    </div>`).join('');
+
+  // INSIGHTS
+  const insights = generateInsights(s, arch, att, elem);
+  document.getElementById('insights-grid').innerHTML = insights.map(i =>
+    `<div class="insight-card fade-in">
+      <div class="insight-icon">${i.icon}</div>
+      <div class="insight-title">${i.title}</div>
+      <div class="insight-text">${i.text}</div>
+    </div>`).join('');
+
+  // Animate bars
+  setTimeout(() => {
+    document.querySelectorAll('.dim-bar-fill').forEach(bar => {
+      bar.style.width = bar.dataset.target + '%';
+    });
+    // Animate stages
+    document.querySelectorAll('.stage-card').forEach((card, i) => {
+      setTimeout(() => card.classList.add('reveal'), i * 200);
+    });
+  }, 100);
+
+  // Scroll reveal
+  setTimeout(() => {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); } });
+    }, { threshold: 0.1 });
+    document.querySelectorAll('.reveal-section').forEach(el => {
+      observer.observe(el);
+    });
+    // Immediately show hero
+    document.getElementById('res-hero').classList.add('visible');
+  }, 50);
+}
+
+function generateInsights(s, arch, att, elem) {
+  const insights = [];
+
+  if (s.O > 65 && s.N > 55) {
+    insights.push({ icon: "🔥", title: "L'intensité créatrice", text: "Votre grande ouverture combinée à une forte réactivité émotionnelle crée une sensibilité particulièrement fertile pour la création. Vous voyez plus, ressentez plus, connectez plus. Le revers : vous êtes aussi plus exposé(e) à la surcharge sensorielle et émotionnelle. Votre richesse intérieure est une ressource, pas un fardeau — à condition d'apprendre à la doser." });
+  } else if (s.C > 65 && s.O > 55) {
+    insights.push({ icon: "⚗️", title: "La puissance manifestante", text: "Rares sont ceux qui allient à la fois l'imagination et la discipline. Vous pouvez concevoir ET réaliser. C'est une combinaison exceptionnelle pour créer quelque chose de durable et d'original — une œuvre, une entreprise, une vie intentionnelle. Votre danger : le perfectionnisme qui immobilise." });
+  } else if (s.E > 65 && s.A > 55) {
+    insights.push({ icon: "☀️", title: "Le magnétisme naturel", text: "Votre combinaison d'extraversion et de bienveillance crée un magnétisme naturel. Les gens viennent à vous non par fascination mais par confiance. Vous fédérez sans effort — ce qui peut parfois vous exposer à porter plus que votre part du poids collectif." });
+  } else {
+    insights.push({ icon: "✨", title: "Votre signature unique", text: `Votre profil révèle ${arch.sub.toLowerCase()} comme disposition centrale. C'est le prisme à travers lequel vous percevez le monde, prenez vos décisions, nourrissez vos relations. Le reconnaître pleinement est déjà un acte de puissance.` });
+  }
+
+  insights.push({ icon: "🌿", title: "Dans vos relations", text: `Style d'attachement ${att.label}. ${att.label === 'Sécure' ? "Votre ancrage relationnel est un cadeau — pour vous et pour ceux que vous aimez. Vous pouvez offrir la sécurité sans la contrôler, aimer sans vous perdre." : att.label.includes('Anxieux') ? "Votre intensité relationnelle est votre don et votre défi. Apprivoiser la peur du rejet — non pour ne plus rien ressentir, mais pour ne plus laisser cette peur piloter vos choix — est votre chemin de croissance le plus fécond." : "Votre indépendance est un trésor à ne pas confondre avec de la froideur. Votre ombre relationnelle : les personnes que vous avez peut-être tenues à distance alors qu'elles méritaient d'entrer."}` });
+
+  if (s.O > 70 && s.C < 45) {
+    insights.push({ icon: "⚡", title: "L'idée et l'acte", text: "Votre esprit génère plus d'idées que vos structures n'en réalisent. Le défi n'est pas de freiner votre ouverture, mais de lui offrir des rails suffisants. Une pratique simple : pour chaque nouvelle idée, finissez d'abord une action commencée." });
+  } else if (s.N > 65 && s.ei < 50) {
+    insights.push({ icon: "🌊", title: "Apprivoiser les marées", text: "Vous ressentez intensément et avez encore des ressources à développer pour réguler ce flux. Des pratiques de pleine conscience, de journaling ou d'accompagnement thérapeutique peuvent vous aider à transformer l'intensité en profondeur — non en la supprimant, mais en la domestiquant." });
+  } else {
+    insights.push({ icon: "🧿", title: "La prochaine étape", text: "Tout profil possède une polarité à cultiver. Observez où vous dépensez de l'énergie à vous adapter plutôt qu'à vous exprimer. C'est là — précisément là — que se cache votre prochaine zone de croissance." });
+  }
+
+  insights.push({ icon: "☿", title: `Votre élément · ${elem.name}`, text: `En lecture alchimique, votre profil correspond à l'élément ${elem.name} (${elem.latin}). ${elem.elementDesc.split('.')[0]}. Chaque élément a son chemin de transmutation — et le vôtre commence par reconnaître ce que vous êtes, avant de chercher à le changer.` });
+
+  insights.push({ icon: "🔮", title: "Votre façon de penser", text: s.cognitive >= 55 ?
+    "Vous êtes un penseur intuitif et synthétique. Vous saisissez le tout avant les parties, les analogies avant les définitions. Ce mode de pensée est précieux pour la vision stratégique, la création, l'enseignement du sens. Votre défi : ne pas brûler les étapes logiques que votre entourage attend." :
+    "Vous pensez de manière analytique et rigoureuse. Vous vérifiez, structurez, distinguez l'essentiel de l'accessoire. Ce mode de pensée est une force rare pour la résolution de problèmes complexes. Votre invitation : accorder parfois confiance à ce que vous ressentez sans pouvoir encore l'expliquer." });
+
+  insights.push({ icon: "☽", title: "Ce portrait dans le temps", text: "Ce profil n'est pas un destin — c'est une carte. Les traits que vous avez exprimés aujourd'hui sont un instantané d'un être en mouvement continu. Certaines dimensions sont stables sur des décennies ; d'autres évoluent radicalement après une expérience fondatrice. La conscience de ces dimensions est déjà, en soi, un acte d'évolution." });
+
+  return insights;
+}
+
+function restartTest() {
+  currentQ = 0;
+  answers = {};
+  for(let i=1;i<=5;i++) document.getElementById('step-'+i).classList.remove('show');
+  // Clear URL params
+  history.replaceState(null, '', window.location.pathname);
+  showScreen('intro');
+}
+
+// =====================================================
+// SHARE — encode scores into URL hash
+// =====================================================
+let lastScores = null;
+let lastArchetype = null;
+let lastElement = null;
+
+function encodeScores(s) {
+  const keys = ['O','C','E','A','N','attach_anxious','attach_avoidant','val_achievement',
+    'val_universalism','val_self','val_tradition','val_stimulation','val_security','ei','cognitive'];
+  return keys.map(k => Math.round(s[k] || 0)).join('-');
+}
+
+function decodeScores(str) {
+  const keys = ['O','C','E','A','N','attach_anxious','attach_avoidant','val_achievement',
+    'val_universalism','val_self','val_tradition','val_stimulation','val_security','ei','cognitive'];
+  const vals = str.split('-').map(Number);
+  const s = {};
+  keys.forEach((k, i) => s[k] = vals[i] || 50);
+  s.attach_secure = 100 - Math.round((s.attach_anxious + s.attach_avoidant) / 2);
+  return s;
+}
+
+function shareResult() {
+  if (!lastScores) return;
+  const encoded = encodeScores(lastScores);
+  const url = window.location.href.split('#')[0].split('?')[0] + '?r=' + encoded;
+  navigator.clipboard.writeText(url).then(() => {
+    const toast = document.getElementById('share-toast');
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 3000);
+  }).catch(() => {
+    // Fallback: show the URL in a prompt
+    prompt('Copiez ce lien :', url);
+  });
+}
+
+// =====================================================
+// DOWNLOAD — draw result card on canvas
+// =====================================================
+function downloadCard() {
+  if (!lastScores) return;
+  const s = lastScores;
+  const arch = getArchetype(s);
+  const elem = getAlchemicalElement(s);
+
+  const canvas = document.getElementById('share-canvas');
+  const W = 800, H = 500;
+  canvas.width = W; canvas.height = H;
+  const ctx = canvas.getContext('2d');
+
+  // Background
+  ctx.fillStyle = '#0e1016';
+  ctx.fillRect(0, 0, W, H);
+
+  // Gold border
+  ctx.strokeStyle = 'rgba(212,168,67,0.4)';
+  ctx.lineWidth = 1;
+  ctx.strokeRect(20, 20, W-40, H-40);
+  ctx.strokeRect(26, 26, W-52, H-52);
+
+  // Corner ornaments
+  const corners = [[30,30],[W-30,30],[30,H-30],[W-30,H-30]];
+  corners.forEach(([x,y]) => {
+    ctx.fillStyle = '#d4a843';
+    ctx.fillRect(x-3, y-3, 6, 6);
+  });
+
+  // Element symbol
+  ctx.font = '72px serif';
+  ctx.textAlign = 'center';
+  ctx.fillText(elem.symbol, W/2, 120);
+
+  // Title — archetype
+  ctx.fillStyle = '#e8e2d6';
+  ctx.font = 'bold 32px Georgia, serif';
+  ctx.fillText(arch.title, W/2, 170);
+
+  // Subtitle
+  ctx.fillStyle = '#d4a843';
+  ctx.font = 'italic 16px Georgia, serif';
+  ctx.fillText(arch.sub, W/2, 196);
+
+  // Element line
+  ctx.fillStyle = '#7a7060';
+  ctx.font = '14px Georgia, serif';
+  ctx.fillText(`Élément · ${elem.name}  ·  ${elem.latin}`, W/2, 226);
+
+  // Divider line
+  ctx.strokeStyle = 'rgba(212,168,67,0.3)';
+  ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(W/2 - 180, 240); ctx.lineTo(W/2 + 180, 240); ctx.stroke();
+
+  // Score bars
+  const dims = [
+    { label: 'Ouverture', v: s.O, color: '#7090c0' },
+    { label: 'Conscienc.', v: s.C, color: '#70a080' },
+    { label: 'Extraver.', v: s.E, color: '#c08040' },
+    { label: 'Agréabil.', v: s.A, color: '#a07070' },
+    { label: 'Stabilité', v: 100-s.N, color: '#9070c0' },
+    { label: 'IE', v: s.ei, color: '#50b0b0' },
+  ];
+
+  const barW = 96, barH = 6, startX = 60, startY = 270, gap = 110;
+  dims.forEach((d, i) => {
+    const x = startX + i * gap;
+    // Label
+    ctx.fillStyle = '#7a7060';
+    ctx.font = '11px Georgia, serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(d.label, x + barW/2, startY - 8);
+    // Track
+    ctx.fillStyle = 'rgba(212,168,67,0.1)';
+    ctx.fillRect(x, startY, barW, barH);
+    // Fill
+    ctx.fillStyle = d.color;
+    ctx.fillRect(x, startY, Math.round(barW * d.v / 100), barH);
+    // Score
+    ctx.fillStyle = d.color;
+    ctx.font = 'bold 13px Georgia, serif';
+    ctx.fillText(d.v + '%', x + barW/2, startY + 24);
+  });
+
+  // Alchemical stages line
+  const stages4 = ['🌑 Nigredo', '🌕 Albedo', '🌟 Citrinitas', '🔴 Rubedo'];
+  ctx.fillStyle = '#7a7060';
+  ctx.font = '12px Georgia, serif';
+  ctx.textAlign = 'center';
+  stages4.forEach((st, i) => {
+    ctx.fillText(st, 120 + i * 175, 340);
+  });
+
+  // Bottom quote
+  ctx.fillStyle = 'rgba(212,168,67,0.6)';
+  ctx.font = 'italic 13px Georgia, serif';
+  ctx.fillText(`"${elem.greatWork.split(':')[0]}"`, W/2, 390);
+
+  // Watermark
+  ctx.fillStyle = 'rgba(212,168,67,0.25)';
+  ctx.font = '11px Georgia, serif';
+  ctx.fillText('Cartographie de l\'Âme — Test de Personnalité', W/2, 460);
+
+  // Download
+  const link = document.createElement('a');
+  link.download = `cartographie-ame-${elem.name.toLowerCase()}.png`;
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+}
+
+// =====================================================
+// AUTO-LOAD FROM URL
+// =====================================================
+(function checkURL() {
+  const params = new URLSearchParams(window.location.search);
+  const r = params.get('r');
+  if (!r) return;
+  try {
+    const s = decodeScores(r);
+    // Skip test, go straight to results
+    showScreen('loading');
+    const steps = [1,2,3,4,5];
+    steps.forEach((st, i) => {
+      setTimeout(() => document.getElementById('step-' + st).classList.add('show'), i * 400);
+    });
+    setTimeout(() => renderResults(s), 2200);
+  } catch(e) {
+    console.warn('Invalid result URL', e);
+  }
+})();
+</script>
+</body>
+</html>
